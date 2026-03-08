@@ -178,7 +178,7 @@ The service only runs on fights whose encounter ID is listed in the relevant enc
 
 Performance measures what happened during combat at the player level. Unlike Execution (which scores mechanic compliance) and Preparation (which scores readiness), Performance reflects how efficiently players used their toolkit over the course of the raid.
 
-The scored Performance metrics are deaths, overhealing, DPS (class median), and healing efficiency (class median).
+The scored Performance metrics are deaths, overhealing, DPS (class median), healing efficiency (class median), and active time.
 
 ### Death Analysis
 
@@ -227,6 +227,30 @@ Records total damage taken per player, broken down by trash, boss, and full clea
 Each non-tank player is scored relative to the raid average boss damage taken. Players who took less damage than average score higher. Tanks are excluded from scoring since their damage intake is role-inherent. The raid-wide damage taken score is the average of all non-tank player scores.
 
 **WCL data used:** DamageTaken table (Tier 2), with a trash data pass.
+
+### Active Time
+
+**Key:** `active_time` | **Expansions:** Vanilla Classic, Season of Discovery
+
+Tracks the percentage of fight time each player was actively dealing damage or healing. Active time is sourced from the `activeTime` field in the WCL DamageDone and HealingDone table entries. For each player, the maximum of the two sources is used so healers who contribute low damage are not undercounted.
+
+Results are segmented into boss, trash, and total scope. Per-player active percentages are produced for each segment. The raid summary reports the average boss active% across all players and the player with the lowest boss active%.
+
+Active time is currently informational and feeds into the Performance score for future scoring iterations.
+
+**WCL data used:** DamageDone table, HealingDone table (Tier 2), with a trash data pass.
+
+### Fight Timeline
+
+**Key:** `fight_timeline` | **Expansions:** All
+
+Renders a chronological timeline of the full raid session. Each boss pull and trash segment appears in order with fight duration and idle time since the previous fight. The timeline makes it easy to see where the raid spent its time and how much was lost to downtime between pulls.
+
+Pacing stats in the raid summary cover total raid duration, total fight time broken down into boss and trash, and cumulative idle time. For Naxxramas raids, wing clear times are additionally computed: each wing's time is the boss kill time minus the sum of all previously completed wing end times, matching the classic CLA spreadsheet formula.
+
+The service makes no additional WCL API calls — it derives everything from fight metadata already present in the analysis pipeline.
+
+**WCL data used:** None (fight metadata only).
 
 ### Trinket Usage
 

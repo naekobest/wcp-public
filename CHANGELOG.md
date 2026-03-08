@@ -1,5 +1,63 @@
 # Changelog
 
+## 2026-03-07
+
+### Fight Timeline
+
+New analysis service: `fight_timeline` in the Performance category. Renders a chronological fight timeline for the entire raid session — each boss pull and trash segment appears in order, with idle time between fights shown as a distinct gap.
+
+The timeline result includes:
+
+- **Per-fight row**: name, kill/wipe status, fight duration, and idle time before the next pull
+- **Pacing stats**: total raid duration, total fight time, boss fight time, trash fight time, and total idle time
+- **Naxxramas wing times**: for Naxx raids, each wing is timed independently. Wing time is calculated as kill time minus the sum of all previously cleared wings, matching the classic CLA spreadsheet formula. Wings not cleared show as `null`
+
+The service uses fight metadata already available in the analysis pipeline and makes no additional WCL API calls.
+
+### Re-analysis for Premium+
+
+Premium+ subscribers can now manually trigger a re-analysis of their own reports directly from the report page. This re-runs the full analysis pipeline against the current service configuration — useful when a report was analyzed before a new service was deployed or when data was corrupted.
+
+Re-analysis is rate-limited to one run per report per hour. The triggering user's tier determines the queue priority, so a Premium+ user who re-analyzes a report originally submitted by a free-tier user gets Premium+ queue priority.
+
+### Personal WCL API Key
+
+Registered users can now configure a personal WarcraftLogs API key at **Settings → WCL API Key**. When set, analysis jobs that belong to that user use the personal key instead of the shared application key for WCL API requests.
+
+This increases available rate limit headroom for active users and avoids contention with the shared key during peak submission periods.
+
+### Email Verification: Onboarding Step
+
+Email/password users who have not yet verified their email address are now guided through verification inline in the onboarding modal, rather than being blocked at a later step with a generic error. A verification code input is added as a discrete onboarding step that appears only for accounts that require it.
+
+### WCL Credential Revocation on Expired Token
+
+When a WarcraftLogs refresh token expires, the application now revokes only the WCL connection rather than logging the user out of the app entirely. The three WCL token fields are cleared and the user is redirected to **Settings → Linked Accounts** with a prompt to reconnect. The app session and all other settings remain intact.
+
+Previously, expired WCL tokens triggered a full logout, which caused confusion for users who had the app open across multiple sessions.
+
+### Security Hardening
+
+A suite of security improvements aligned with OWASP best practices:
+
+- **HTTP security headers**: `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, and `Permissions-Policy` applied via a middleware layer
+- **Rate limiting**: auth endpoints (login, register, password reset) and the analysis submission endpoint now have per-IP rate limits
+- **Session defaults**: `secure`, `http_only`, and `same_site=strict` are now default session cookie settings
+- **`/.well-known/security.txt`**: added for responsible disclosure coordination
+- **CI scanning**: Trivy vulnerability scanning added to the CI pipeline for dependency and container image auditing
+
+### German Locale Coming Soon
+
+German (Deutsch) is now listed as a "coming soon" option in the language selector. The locale is fully implemented but not yet available for selection. It will be enabled once review of the translations is complete.
+
+### Features Page Redesign
+
+The `/features` page has been redesigned with four editorial sections — one per analysis category (Preparation, Performance, Execution, Buffs). Each section alternates layout between a live mock analytics panel and a category description with sub-feature tags. Mock panels show readiness tables, DPS leaderboards, metric bars, and buff coverage charts that reflect the structure of real report data.
+
+### Admin: Submission Heatmap
+
+The admin dashboard now includes a GitHub-style activity heatmap showing the daily report submission count over the past year. Each cell is colored by submission volume, making it easy to spot activity patterns, seasonal peaks, or dead periods. The admin reports page has a matching heatmap for the same dataset.
+
 ## 2026-03-06
 
 ### App Name
