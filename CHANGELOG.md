@@ -1,5 +1,110 @@
 # Changelog
 
+## 2026-03-08
+
+> The following features are currently in active development.
+
+### Dashboard: Engagement Stats & WCL API Budget
+
+The authenticated dashboard has been fully redesigned around user-specific engagement metrics. Six animated stat cards surface personal numbers — raids analyzed, reports submitted, best and average score, active weeks streak, and raiding since date — using WoW quality tier colors derived from each metric.
+
+A new SVG arc gauge tracks WCL API budget consumption in real time. The gauge pulls rate-limit data from the WarcraftLogs API using the user's personal API key when set, falling back to the shared application key. Budget is shown as a percentage alongside raw request counts.
+
+The layout switches to a 50/50 equal-height grid with paginated panels for recent WCL reports and pending analyses side by side. Count-up animations and staggered card entrance transitions run on load; `prefers-reduced-motion` is respected.
+
+### Discord Integration
+
+Three-phase Discord integration:
+
+**Rich link previews**: Report and profile pages now include full OpenGraph meta tags — title, description, image, and URL — so Discord (and other platforms) generate rich embeds when links are pasted.
+
+**Webhook notifications**: Analysis-complete, achievement-unlocked, and changelog-published events are delivered as formatted Discord embeds to a configured server channel. Webhook URLs are encrypted at rest. Each embed uses colors derived from the relevant tier or achievement, with structured field layouts matching the event type.
+
+**Discord account linking**: Users can connect and disconnect a Discord account at **Settings → Linked Accounts** alongside Battle.net. The implementation uses a custom Socialite provider for Discord OAuth.
+
+### Auth: WarcraftLogs Account Linking
+
+Email-registered users can now link a WarcraftLogs account at **Settings → Linked Accounts**. This enables WCL-backed features (character sync, log imports, personal API key) without requiring WCL-only registration.
+
+The link flow uses a separate OAuth callback from the guest login path. Linking a WCL account already owned by another user is blocked. WCL-primary users (registered via WarcraftLogs OAuth) are prevented from disconnecting their WCL link to avoid account lockout.
+
+### Auth: Password Strength & UI Polish
+
+A new `PasswordInput` component adds a show/hide toggle to all password fields. A `PasswordStrength` component renders a 4-level visual strength meter on the register and reset-password pages. A real-time match indicator appears on password confirm fields.
+
+The remember me checkbox is now rendered and wired on the login form. The WarcraftLogs OAuth button is repositioned above the form on the register page. Full German translation parity has been added for register and reset-password.
+
+### Notification Center
+
+A new **Settings → Notifications** page lets users toggle in-app notification types individually. Each user's preferences are stored in a `notification_preferences` JSON column. The opt-out gate is applied in each notification's `via()` method — disabled types are not queued at all.
+
+System notifications (e.g. security alerts) are always-on and shown in a read-only row. The page uses auto-save toggles with no submit button.
+
+### Consumables: Scoring Refactor & Display Redesign
+
+The consumables scoring formula now distinguishes between missing consumables (full penalty) and suboptimal ones (present but not the best available option, weighted at 0.5). Compliance is pre-computed per category directly in per-boss results, enabling a new summary strip with stat cards and per-category compliance progress bars. Per-boss breakdowns are collapsible.
+
+An optional bonus score component (0–5%, capped) for above-and-beyond consumable use is separated from the required compliance score.
+
+### Analysis: Expose Armor Rework
+
+The Expose Armor service has been overhauled with zero-tolerance gap detection:
+
+- Gap filtering reduced from 2,000 ms to 100 ms — every drop is tracked
+- Time-to-first-expose per boss is tracked and displayed
+- The 20% uptime hide threshold has been removed
+- Scoring combines a drop count penalty (10% each) with a duration penalty
+- Gap severity labels updated: Short < 2 s, Medium 2–10 s, Long ≥ 10 s
+- `firstExposeMs` is included in the timeline bar tooltip
+
+### Analysis: Feral Faerie Fire Tracking
+
+Feral Faerie Fire (spell IDs 16857–16859, 17390) is now tracked separately from regular Faerie Fire in the Debuff Uptime service. Per-fight Feral FF uptime is surfaced in a segmented coverage bar: green for regular FF, amber for Feral FF. The legend shows the Feral FF percentage as potential grief, since Feral FF is mechanically weaker than the standard caster version.
+
+### Admin Panel: Phase 3
+
+Extended admin controls across two areas:
+
+**Report management**: cancel, force-delete, and priority queue override per report. Column sorting, bulk cancel/requeue/delete with confirmation dialogs. Archive and unarchive support.
+
+**Member management**: timed bans with auto-expiry, login history display, forced-acknowledgment admin alerts, and user impersonation (session-based, audit-logged, banned-user-safe). Impersonated sessions show a persistent banner and suppress the onboarding modal. Inline ban/unban, admin notes, resend verification, and character unlink are available per user.
+
+Two scheduled commands manage housekeeping: `admin:expire-bans` and `admin:prune-login-history`.
+
+### Profile Picture Upload
+
+Users can upload, replace, and remove a profile picture at **Settings → Profile**. Uploaded images are center-cropped and resized to 256×256 WebP using PHP GD with no additional dependencies. The avatar URL is included in Inertia shared props and displayed wherever the user's profile is shown. Avatars are cleaned up on account soft-deletion.
+
+### Transactional Mail & Password Reset
+
+Transactional mail is now configured via SMTP. Vendor mail templates have been published and branded with a WoW Rare Blue accent (`#0070dd`). The forgot-password flow is now fully wired end to end.
+
+`RaidAnalysisCompleted` conditionally sends a mail notification when the user has a verified email address; accounts without email receive only the in-app database notification. Mail notifications are queued.
+
+### Accessibility
+
+A comprehensive WCAG compliance pass across the frontend:
+
+- Skip-to-content link at the top of every page
+- `aria-describedby` and `aria-invalid` on all form inputs
+- `aria-live` regions and `role="alert"` on queue status transitions
+- `prefers-reduced-motion` support across all CSS animations
+- `aria-label` on all icon-only buttons (hamburger, search, notification bell)
+- `role="radiogroup/radio"` on segmented controls; `role="list"` on custom list components
+- `aria-hidden` on decorative SVGs and skeleton elements
+- `tabIndex` fix on the scroll-to-top button (removed from tab order)
+- `ExternalLink` component wraps all `target="_blank"` links with `rel="noopener noreferrer"` and a screen-reader-only "(opens in new tab)" hint
+- Semantic heading levels via an `as` prop on the `Heading` component
+- `aria-sort` and keyboard-accessible sort buttons on sortable table headers
+- Per-cell keyboard focus and `aria-label` on the admin submission heatmap
+- Nav landmark regions and `aria-current` on the sidebar navigation
+
+### Fixed
+
+- **Duplicate analysis notification**: re-analyzing a report no longer creates a duplicate `RaidAnalysisCompleted` notification. The prior notification for the same user and report is deleted before the new one is queued.
+
+---
+
 ## 2026-03-07
 
 ### Fight Timeline
@@ -57,6 +162,8 @@ The `/features` page has been redesigned with four editorial sections — one pe
 ### Admin: Submission Heatmap
 
 The admin dashboard now includes a GitHub-style activity heatmap showing the daily report submission count over the past year. Each cell is colored by submission volume, making it easy to spot activity patterns, seasonal peaks, or dead periods. The admin reports page has a matching heatmap for the same dataset.
+
+---
 
 ## 2026-03-06
 
@@ -154,6 +261,8 @@ All ranks of tracked debuffs are now correctly matched. Previously, only the hig
 
 An indeterminate progress bar is now shown during the WCL data fetch phase of analysis. The status label reads "Fetching data" while the pipeline is hydrating the report context, giving clearer visual feedback before result processing begins.
 
+---
+
 ## 2026-03-05
 
 ### Changelog
@@ -204,6 +313,8 @@ Scoring: `actual_uses / expected_uses`, capped at 100%. Expected uses are derive
 
 Configured trinkets for Vanilla Classic include major DPS trinkets (Zandalarian Hero Charm, Earthstrike, Badge of the Swarmguard, Jom Gabbar, Kiss of the Spider), healer and tank trinkets, and racial abilities (Blood Fury, Berserking).
 
+---
+
 ## 2026-03-04
 
 ### Expose Armor Drop Detection: Refined Gap Analysis
@@ -225,6 +336,8 @@ The Expose Armor drop detection introduced on 2026-03-03 has been refined with m
 **"Not maintained" state**: Bosses where Expose Armor uptime is below 20% and no gap data exists are flagged as "Not maintained" rather than showing misleading gap counts.
 
 **Gap duration display**: Per-boss fallback rows now show the duration of each gap inline.
+
+---
 
 ## 2026-03-03
 
@@ -290,6 +403,8 @@ An Application Logs summary card on the admin index page shows recent error and 
 
 - **Dependabot** configured for npm and Composer dependency updates with weekly schedule.
 - Security dependency bumps: minimatch, ajv, rollup.
+
+---
 
 ## 2026-03-02
 
@@ -366,6 +481,8 @@ A guided onboarding checklist helps new users through account setup: connecting 
 
 - Deferred prop loading with skeleton states on category tab content. Switching between analysis categories (Execution, Preparation, Performance, Buffs) shows a pulsing skeleton while data loads rather than a blank page.
 
+---
+
 ## 2026-03-01
 
 ### Ignite Rewrite
@@ -399,6 +516,8 @@ The standalone Ignite Griefing tab remains as a raid-wide overview showing total
 - Service documentation for Ignite updated to reflect the debuff-band-based approach. The "How it works" explanation in both the standalone page and the in-report help sheet now covers uptime tracking, per-instance breakdowns, and grief detection in a single view.
 - Ignite Griefing documentation updated to describe the raid-wide overview role and cross-references the Ignite tab for per-instance grief details.
 
+---
+
 ## 2026-02-28
 
 ### UI
@@ -424,6 +543,8 @@ All services that previously reported only boss-scoped results now produce three
 
 - `needsTrashData` was ignored during the Deaths event fetch — deaths in trash pulls were missing from results.
 - `ScopeToggle` visibility is now guarded explicitly; the previous `?? false` cast could produce incorrect visibility in edge cases.
+
+---
 
 ## 2026-02-27
 
@@ -453,6 +574,8 @@ All services that previously reported only boss-scoped results now produce three
 - **Analysis Services** (`docs/services.md`) fully rewritten. The previous table-based overview is replaced with detailed per-service explanations: what each service measures, why the mechanic matters, what WarcraftLogs data it consumes, and how its output feeds into scoring. The Report Card section now documents the scoring formula for each category (Execution, Preparation, Performance, Buffs), how missing data is handled via weight redistribution, and the full score-to-grade mapping table. Category weight rationale is also included.
 - Added per-service documentation files in `docs/services/` with technical analysis, scoring formulas, WCL data dependencies, and implementation notes for each analysis service.
 
+---
+
 ## 2026-02-26
 
 ### New Analysis Services
@@ -467,6 +590,8 @@ All services that previously reported only boss-scoped results now produce three
 ### Pipeline
 
 - `DataRequirements` gained a `needsPlayers()` flag. Services that need role-segmented roster data declare this flag and receive healer and tank name sets via `ReportContext`.
+
+---
 
 ## 2026-02-25
 
