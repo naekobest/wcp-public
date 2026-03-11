@@ -1,3 +1,55 @@
+## 2026-03-11
+
+### Platform-wide Statistics Page
+
+A new public `/stats` page surfaces aggregated data across all expansions. Four independently-deferred sections load with skeleton placeholders and resolve in parallel: Activity Metrics (total reports, players, raids, kill count), Class Rankings (submissions and average scores per class using WoW class colors), Score Distribution (tier breakdown across all analyzed reports), and Zone Stats (kill counts and average scores per raid zone).
+
+Data is aggregated via a dedicated `PlatformStatsService` with a 30-minute Redis cache. Activity counters animate from zero on mount. The Statistics link is included in the sidebar navigation and the page is fully accessible to guests.
+
+### Character: Role-aware Scoring
+
+Overall character scores and trend charts now account for role. Healers are excluded from the Performance score component; tanks are excluded from both Performance and Buffs. Existing per-raid snapshots are recomputed using the same role-aware formula.
+
+The Trend Chart on character profiles filters visible score lines to match the character's role — healers see four lines, tanks three, DPS all five. The loading skeleton adjusts its line count accordingly to avoid layout shift.
+
+### Player Comparison: Sub-score Tier Gate
+
+Performance sub-scores on the comparison page are now gated server-side. Free-tier and unauthenticated users receive empty `sub_scores` arrays — no sub-score queries run at all. The Advanced Breakdown section shows a lock icon and Upgrade CTA for non-premium users, and is always visible (not conditionally rendered) so the upsell is not missed.
+
+### Queue: Live-update Indicator
+
+The queued state on the report page now shows an animated indeterminate progress bar (matching the processing state) and a brief "Refreshing…" flash after each poll cycle. Previously the queued state showed a static gray bar with no visual feedback that the page was auto-updating.
+
+### Scheduled Changelog Publishing
+
+Admins can now schedule a changelog entry to go live at a specific future date and time (UTC) rather than publishing immediately. Scheduled entries appear with an amber "Scheduled" badge in the admin list and are hidden from public views until their publish time arrives. The linked Discord webhook notification is dispatched with a matching delay and is idempotent — rescheduling an entry does not send duplicate notifications.
+
+An "Unschedule" action resets a scheduled entry back to draft. The "Publish Now" button is available in edit mode to override the schedule immediately.
+
+### Fixed
+
+- **Death Wish type**: Death Wish (`#249`) is now classified as `debuff` rather than `throughput`. It is scored identically to throughput cooldowns but rendered separately in amber styling in per-player breakdowns.
+- **Zanza buffs as consumables**: Spirit of Zanza, Sheen of Zanza, and Swiftness of Zanza are now treated as a required consumable category rather than world buffs. The required consumable count increases from 5 to 6.
+- **Admin expansion config blank page**: the `/admin/expansion-config/{expansion}` detail page crashed on render when consumable config values were nested objects rather than flat arrays. Nested structures now render as structured key-value rows with an expandable view for deeply nested data.
+- **WCL URL validation**: localized WarcraftLogs domains with multiple subdomain levels (e.g. `de.vanilla.warcraftlogs.com`) were incorrectly rejected by the report submission validator.
+- **Character sync after expired WCL token**: `SyncCharactersJob` previously threw a `RuntimeException` when the WCL access token had expired, causing all post-analysis character sync attempts to fail silently. The job now refreshes the token automatically before proceeding. If the refresh token is also expired, the expansion is removed from `synced_game_versions` so the next WCL login re-triggers the sync.
+- **Enchant coverage**: 29 additional one-handed weapons and 18 two-handed weapons (including MC drops, world bosses, Dire Maul, PvP rewards, crafted weapons, and all Atiesh variants) are now included in the enchant requirement check for Vanilla Classic.
+
+### Improvements
+
+- Touch targets on mobile menu and sidebar actions increased to 44px (WCAG 2.5.8 compliance).
+- Player detail drawer uses full width on mobile.
+- Admin changelog tables gain a horizontal scroll wrapper on narrow viewports.
+- Audit log filter inputs are properly associated with label elements.
+- Crown icons in the comparison table are wrapped with screen-reader text and `aria-hidden`.
+- Progress bars switch from width to `transform: scaleX` animation for better GPU compositing.
+- Search requests use `AbortController` to cancel in-flight calls when a new keystroke arrives.
+- `PlayerRow` and `CountdownText` extracted as `React.memo` components to reduce unnecessary re-renders.
+- Hardcoded color values across components replaced with design tokens; tier bar colors for Poor and Common tiers corrected to use `muted-foreground` tokens.
+- Rate limits tuned: character sync 5→15/min, OAuth callbacks 10→20/min, free-tier report submission 10→15/hr.
+
+---
+
 # Changelog
 
 ## 2026-03-08
