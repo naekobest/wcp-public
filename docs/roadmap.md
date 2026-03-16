@@ -18,6 +18,30 @@ Classic progression servers move forward over time and WarcraftPulse is designed
 
 ### Recently Shipped
 
+- **GDKP module (public beta)** — organization management, template presets, WCL rule templates, sign-ups (web + Discord bot), gold sheets with boss assignments and assignment matrix, cut calculation with role brackets and bonus caps, treasury with auto-booking and cross-sheet payouts, CSV export, public sheets with integrity hash, Gargul and Softres import, recurring raids
+- **Desktop uploader** — Windows app (.NET 8) for automatic combat log upload with auto-watch, duplicate detection, upload history, and DPAPI token encryption ([source](https://github.com/naekobest/warcraftpulse-uploader))
+- **Discord bot** — sidecar Node.js bot for raid event embeds and button-based sign-ups in Discord, with automatic signup linking on account connect ([source](https://github.com/naekobest/warcraftpulse-discord-bot))
+- **Upload API** — authenticated REST endpoint for pre-parsed combat log data, API token management at Settings → API (Pro tier), Sanctum-based auth with rate limits
+- **Combat log parser** — server-side parser for raw WoW log files including COMBATANT_INFO gear/aura extraction, WCL-compatible output format
+- **Report page redesign** — service result cards with score bar navigation, deep-dive views, redesigned report lists with tier pills and sparklines, sticky header with section scores, keyboard navigation, compare bar, progressive results during analysis, density toggle, copy summary, tier gem icons
+- **Snapshot retention** — tier-based retention periods with `expires_at` timestamps and report-page retention banner
+- **Platform-wide statistics** — public `/stats` page with activity metrics, class rankings, score distribution, and zone stats
+- **Character: role-aware scoring** — healers excluded from Performance, tanks excluded from Performance and Buffs, role-filtered trend charts
+- **Dashboard: engagement stats** — six per-user metric cards with tier colors and count-up animations, WCL API budget arc gauge
+- **Discord integration** — OG meta tags for rich link previews, webhook notifications for analysis-complete, achievements, and changelog events, Discord account linking via OAuth
+- **WarcraftLogs account linking** — link/unlink WCL to email-registered accounts in Settings → Linked Accounts, with lockout guard for WCL-primary users
+- **Auth UI polish** — password strength meter, show/hide toggle, real-time confirm match indicator, remember me, repositioned OAuth button
+- **Notification Center** — per-type opt-in/out toggles at Settings → Notifications, auto-save, system notifications always-on
+- **Consumables redesign** — required vs. optional bonus score separation, per-category compliance cards with progress bars, collapsible per-boss sections
+- **Expose Armor rework** — zero-tolerance gap detection (100 ms threshold), time-to-first-expose, zero-uptime threshold removed, updated severity labels
+- **Feral Faerie Fire tracking** — tracked separately from regular FF; segmented coverage bar with amber Feral FF indicator
+- **Admin Phase 3** — report bulk controls, archive/unarchive, member timed bans, login history, forced-acknowledgment alerts, user impersonation with audit logging
+- **Admin: expansion config editor** — inline-editable sections, diff view, audit log, override indicators, benchmark_min_samples
+- **Admin: GDKP system health** — queue history charts, feature flags, alert thresholds, rate limiter config
+- **Admin: GDKP user tools** — search with filters, suspicious activity detection, per-user GDKP profiles, platform-wide bans
+- **Profile picture upload** — center-cropped 256×256 WebP via PHP GD at Settings → Profile
+- **Transactional mail** — SMTP with branded templates, conditional mail for RaidAnalysisCompleted, queued delivery
+- **Accessibility (WCAG)** — skip-to-content, aria-describedby/aria-invalid on inputs, aria-live on status transitions, prefers-reduced-motion, ExternalLink component, semantic heading levels
 - **App name: WarcraftPulse** — name moved to `VITE_APP_NAME` for self-hosted configurability
 - **Email/password auth** — register, login, forgot password, set password for existing WCL accounts, change email with re-verification
 - **Player comparison** — side-by-side comparison of multiple players across any combination of reports at `/compare`
@@ -52,36 +76,20 @@ Classic progression servers move forward over time and WarcraftPulse is designed
 
 ### In Active Development
 
-- **Dashboard: engagement stats** — six per-user metric cards (raids, scores, streak, raiding since) with tier colors and count-up animations; WCL API budget arc gauge
-- **Discord integration** — OG meta tags for rich link previews; webhook notifications for analysis-complete, achievements, and changelog events; Discord account linking via OAuth
-- **WarcraftLogs account linking** — link/unlink WCL to email-registered accounts in Settings → Linked Accounts, with lockout guard for WCL-primary users
-- **Auth UI polish** — password strength meter, show/hide toggle, real-time confirm match indicator, remember me, repositioned OAuth button
-- **Notification Center** — per-type opt-in/out toggles at Settings → Notifications, auto-save, system notifications always-on
-- **Consumables redesign** — required vs. optional bonus score separation, per-category compliance cards with progress bars, collapsible per-boss sections
-- **Expose Armor rework** — zero-tolerance gap detection (100 ms threshold), time-to-first-expose, zero-uptime threshold removed, updated severity labels
-- **Feral Faerie Fire tracking** — tracked separately from regular FF; segmented coverage bar with amber Feral FF indicator
-- **Admin Phase 3** — report bulk controls, archive/unarchive, member timed bans, login history, forced-acknowledgment alerts, user impersonation with audit logging
-- **Profile picture upload** — center-cropped 256×256 WebP via PHP GD at Settings → Profile
-- **Transactional mail** — SMTP with branded templates, conditional mail for RaidAnalysisCompleted, queued delivery
-- **Accessibility (WCAG)** — skip-to-content, aria-describedby/aria-invalid on inputs, aria-live on status transitions, prefers-reduced-motion, ExternalLink component, semantic heading levels
+- **TBC Classic analysis services** — porting analysis pipeline to TBC spell IDs, thresholds, and mechanics
+- **Season of Discovery coverage** — analysis service parity with Vanilla Classic
+- **Expanded service coverage** — additional Execution checks (kiting, soak assignments) and additional Preparation checks (raid composition analysis)
 
 ### Near Term
 
 - **Character profiles**: per-character history across all analyzed raids, including DPS/HPS trends, mechanic score, preparation score, and role-aware benchmarks
 - **Mobile responsive layout**: the current UI is desktop-first
-- **Season of Discovery coverage**: full analysis service parity with Vanilla Classic
-
-### Medium Term
-
-- **GDKP module**: gold distribution management for GDKP raids. Planned scope includes organization management, calendar and sign-ups, officer draft sheets, gold sheet calculation with revision history, and role-based cut assignments. Analysis data feeds automatically into deduction logic (parse percentiles, DPS, healing, debuff uptime). Finalized gold sheets are always public for transparency.
-- **Expanded service coverage**: additional Execution checks (kiting, soak assignments) and additional Preparation checks (raid composition analysis)
 - **Comparative reports**: a "your guild vs. last week" diff view
 - **Public leaderboards**: opt-in raid scoring by server and faction
 
 ### Long Term / Expansion Dependent
 
 - **Retail support**: Mythic+ analysis, affixes, dungeon-specific mechanics
-- **API access**: for guild management tools and third-party integrations
 
 ## Suggesting a Feature
 

@@ -1,3 +1,126 @@
+## 2026-03-16
+
+### GDKP Module: Public Beta
+
+The GDKP module has graduated from internal development to public beta. Organizations can now manage gold distribution raids end-to-end: create organizations, invite officers, configure raid templates with role brackets and cut formulas, run sign-ups, draft gold sheets, calculate and distribute payouts, and publish tamper-evident public sheets.
+
+Key features shipped since the module entered active development:
+
+**Treasury & Payouts.** Each organization has a treasury ledger with automatic booking of the org cut on sheet finalization, manual ledger entries for corrections, a live balance card, and a designated banker role. Cross-sheet payouts group pending distributions by character across all finalized sheets, with a bulk "mark all paid" action. Finalized and archived sheets can be exported as CSV with participant data, items won, and payout breakdowns.
+
+**Boss Assignments & Bonus Cap.** Templates now support per-boss slot assignments (which players are assigned to which boss kills), a configurable bonus cap in basis points, and an org-level default cap override. The cut calculation engine evaluates boss-slot bonuses alongside role brackets and special roles. The public sheet viewer shows an assignment summary section.
+
+**Assignment Matrix.** Officers get a visual matrix editor on the sheet Assignments tab for mapping players to boss slots. The matrix feeds into the cut calculation and is rendered in per-player views.
+
+**Template Presets.** Organizations can save template configurations as reusable presets and apply them to new templates. Eight system presets ship by default (different raid styles and org sizes). Apply Preset supports full overwrite or snippet merge mode.
+
+**WCL Rule Templates.** Templates can include WCL-backed deduction and bonus rules tied to specific raid zones and bosses. Rules are sourced from admin-managed presets seeded per expansion (Vanilla, TBC). When a template's zone changes, presets are automatically replaced. WCL rules are snapshotted into the sheet config on transition to review status, so the rules that were active at review time are preserved even if the template changes later.
+
+**Raid Zone Management.** Admin pages for managing raid zones, wings, and bosses with full CRUD. Zone hierarchies are seeded for Vanilla and TBC.
+
+**Recurring Raids & Series.** Officers can create recurring raid series from the org settings. Individual raids display their series context, and the create-raid form includes a series toggle. Auto-open-signups runs on a schedule to open sign-ups for upcoming raids.
+
+**Gargul & Softres Integration.** Loot data can be imported from the Gargul addon (parser, preview, bulk import). Softres CSV import renders reserve badges on participants.
+
+**Public Sheets.** Finalized sheets get short public URLs via `short_id`. The public view includes an anonymous cut distribution histogram and an integrity hash verification guide modal. No login required to view a published sheet.
+
+**Wowhead Tooltips.** Pricelist and sheet item views render Wowhead-powered tooltips with rarity colors and item icons.
+
+**Discord Bot Integration.** A dedicated sidecar Discord bot posts and updates raid event embeds in configured channels. Sign-up, cancel, and role-select interactions are handled via buttons and select menus directly in Discord. Embeds update automatically when sign-ups close, raid status changes, or raids are deleted. Officers manage bot channels from a settings page per organization. See the [Discord Bot](#discord-bot) section below for details.
+
+**Discord Signup Linking.** Players who sign up through the Discord bot are tracked via `discord_user_id`. When a player later connects their Discord account on the website, their existing bot sign-ups are automatically linked. Officers can also manually link/unlink Discord users to sign-ups via a search interface.
+
+**UX Redesign.** Four rounds of UX polish across every GDKP flow: creation, configuration, data entry, player-facing pages, officer tools, admin panel, RaidHelper integration, terminology consistency, and mobile touch targets.
+
+### Desktop Uploader
+
+A new companion app for Windows: **WarcraftPulse Uploader**. It watches your WoW combat log directory and automatically uploads logs to warcraftpulse.com when WoW finishes writing them.
+
+- **Auto-watch** detects new log files the moment they're written
+- **Manual upload** via file dialog or system tray menu
+- **Duplicate detection** skips already-uploaded files based on file hash
+- **Upload history** lists past uploads with zone, encounter count, size, and a direct link to the report
+- **Secure token storage** encrypts the API token at rest via Windows DPAPI
+- **Minimize to tray** keeps running in the background without cluttering the taskbar
+- **Start with Windows** optional autostart via the Windows registry
+
+Built with .NET 8, WinForms, and a local combat log parser that pre-processes logs into structured JSON before uploading.
+
+Source: [warcraftpulse-uploader](https://github.com/naekobest/warcraftpulse-uploader)
+
+### Discord Bot
+
+A lightweight Node.js sidecar bot built on discord.js that connects to Discord Gateway and handles raid sign-up interactions. The bot receives button clicks and select menu choices on raid event embeds, forwards them to the Laravel API, and renders ephemeral responses or follow-up modals (e.g. character name prompt for unlinked users).
+
+Three interaction types:
+
+- **Button** — sign up, cancel, or change status on a raid event embed
+- **Select menu** — pick a role/spec when multiple options are available
+- **Modal submit** — enter a character name if the Discord user isn't linked to a WarcraftPulse account yet
+
+The bot is stateless. All business logic lives in the Laravel backend. The bot just bridges Discord Gateway events to the internal API.
+
+Runs as a Docker container with a single required env var beyond the bot token: the Laravel API URL and a shared internal API key.
+
+Source: [warcraftpulse-discord-bot](https://github.com/naekobest/warcraftpulse-discord-bot)
+
+### Upload API
+
+A new authenticated API endpoint accepts pre-parsed combat log data from the desktop uploader. Users generate API tokens at **Settings → API** (gated behind the Pro subscription tier). Tokens are scoped to upload-only operations and managed via Laravel Sanctum.
+
+The endpoint validates the parsed payload structure, deduplicates by file hash, creates a combat log snapshot, and dispatches the analysis pipeline. Rate limits and ban checks are applied at the API layer.
+
+### Report Page Redesign
+
+The report page has been rebuilt from the ground up across five focused iterations:
+
+**Service result cards** now use a horizontal score bar navigation pattern. Each card shows its tier badge, score, and a summary strip. Clicking a card expands it into a deep-dive view with shared components across all service types (player leaderboard, per-boss breakdown, heatmap, timeline).
+
+**Report lists** (recent reports, all reports, user reports) have been redesigned with tier pills, sparkline score trends, and infinite scroll replacing traditional pagination.
+
+**Navigation & flow.** Section scores are visible in a sticky header that stays pinned during scroll. Keyboard navigation (arrow keys) moves between sections. A compare bar at the bottom lets users add players to a comparison without leaving the report.
+
+**Queue & processing UX.** While a report is being analyzed, users see a real-time service checklist showing which services have completed, which are running, and which are pending. Results appear progressively as each service finishes. On completion, a reveal animation shows the final scores. Error recovery lets users retry failed services without resubmitting the entire report.
+
+**Polish & delight.** A density toggle lets users switch between compact and comfortable layouts. Copy-to-clipboard on the summary section. Skeleton loading states match the actual content layout. Tier icons use the WoW item quality gem sprites.
+
+### Snapshot Retention
+
+Analysis snapshots now have tier-based retention periods. Each snapshot receives an `expires_at` timestamp based on the submitting user's subscription tier. The report page shows a retention banner indicating when the snapshot data will be purged. This enables storage management at scale while giving premium users longer data retention.
+
+### Combat Log Parser
+
+A server-side combat log parser has been added for processing raw WoW combat log files uploaded via the desktop app. The parser extracts structured data from `COMBATANT_INFO` events including gear and auras for Preparation scoring, handles zone detection, role classification, and produces output in WCL-compatible format so the same analysis services can run against both WCL API data and locally parsed logs.
+
+### Admin: Expansion Config Editor
+
+The expansion config editor has been rebuilt with inline-editable sections, a diff view showing pending changes vs. the live config, an audit log of previous changes, and override indicators showing which values differ from defaults. The `benchmark_min_samples` parameter is now configurable per expansion to control how many raid samples are needed before median benchmarks are considered reliable.
+
+### Admin: GDKP System Health
+
+A new admin overview for the GDKP module with queue history charts, configurable feature flags for enabling/disabling GDKP features globally, alert thresholds, and rate limiter configuration. Queue snapshots are recorded on a schedule and visualized as time-series charts.
+
+### Admin: GDKP User Tools
+
+Admin tooling for GDKP user management: search with filters, suspicious activity detection with 5 rules and flag management, per-user GDKP profiles showing bans, characters, participations, and stats. Platform-wide bans are enforced at the signup and raid creation level.
+
+### Fixed
+
+- **Constant Performance score**: a bug caused all raids to show a Performance score of 91.7% regardless of actual player performance. The median comparison was reading from a stale benchmark cache that returned the same value for every class. Fixed by adding `benchmark_min_samples` validation and cache invalidation on config changes.
+- **Sheet page crash**: the sheet show page crashed with a blank screen after status transitions due to a stale props reference during Inertia page reload.
+- **Recurring raid form**: missing fields and a field name mismatch caused the recurring raid creation form to submit incomplete data.
+- **Parser accuracy**: multiple rounds of parser fixes for zone detection, role classification, aura block regex, class persistence, player count, tank detection, interrupt parsing, and `ADVANCED_LOG_ENABLED=1` field offset handling.
+
+### Improvements
+
+- Visual redesign of the stats, compare, how-it-works, and profile pages with improved data hierarchy and spacing.
+- Calendar widget on the GDKP Hub page for upcoming raid events.
+- Settings pages cleaned up with consistent card layouts and tab navigation.
+- Discord embed UX improvements: timestamps, progress bars, and loot rules button.
+- Officer Discord controls: cancellation messages and bot channel reminders.
+
+---
+
 ## 2026-03-11
 
 ### Platform-wide Statistics Page

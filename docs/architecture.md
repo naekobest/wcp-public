@@ -65,3 +65,31 @@ Each user has a public profile at `/u/{username}`. The profile displays:
 - Basic account information
 
 Profile visibility and achievement display are user-configurable. The profile page is publicly accessible without authentication.
+
+## Upload API
+
+An authenticated REST API endpoint accepts pre-parsed combat log data from the desktop uploader. Users generate API tokens at **Settings → API** (gated behind the Pro subscription tier). Tokens are scoped to upload-only operations and managed via Laravel Sanctum with per-tier rate limits.
+
+The endpoint validates the parsed payload structure, deduplicates by file hash, creates a combat log snapshot, and dispatches the same analysis pipeline used for WCL-sourced reports. A server-side combat log parser extracts structured data from raw WoW log files, including `COMBATANT_INFO` gear and aura data for Preparation scoring.
+
+## Discord Bot Architecture
+
+The Discord bot is a separate Node.js process (discord.js) that runs as a sidecar alongside the Laravel backend. It connects to Discord Gateway, listens for button, select menu, and modal interactions on raid event embeds, and forwards them to an internal Laravel API endpoint.
+
+The bot is stateless. It has no database, no user sessions, and no business logic. Every interaction is forwarded to the Laravel API with the Discord user ID, guild ID, channel ID, and interaction payload. The Laravel backend decides what to respond with (ephemeral message, follow-up select menu, or modal). The bot renders the response and sends it back to Discord.
+
+Embeds are posted and updated by Laravel queue jobs (`PostEventEmbedJob`, `UpdateEventEmbedJob`, `DeleteDiscordEmbedsJob`) using the bot token for API calls. The bot's Gateway connection only handles incoming interactions.
+
+## GDKP Module
+
+The GDKP module is a multi-tenant system where each organization manages its own raids, templates, members, and gold sheets. Data is scoped per organization with officer-level authorization via an `AuthorizesOfficer` trait.
+
+Key architectural decisions:
+
+- **Template presets** allow reusable raid configurations. System presets are seeded per expansion. Org presets are user-created.
+- **WCL rule templates** tie deduction/bonus rules to raid zones and bosses. Rules are snapshotted into the sheet config on review transition so they're immutable once locked.
+- **Cut calculation** runs in a service layer with role brackets, special roles, boss-slot bonuses, and configurable caps. Results are deterministic given the same inputs.
+- **Public sheets** use short IDs for shareable URLs and include an integrity hash for tamper evidence.
+- **Treasury** auto-books the org cut on sheet finalization and supports manual ledger entries for corrections.
+
+The Discord bot handles sign-up interactions for GDKP raids. Players who sign up through Discord are tracked by `discord_user_id` and automatically linked when they connect their Discord account on the website.

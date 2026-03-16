@@ -90,6 +90,36 @@ Pin up to 3 achievements to your public profile as a showcase. Achievement progr
 
 Every user gets a public profile at `/u/{username}` showing their pinned achievement showcase and visible achievements. Profile visibility and achievement display are configurable in settings.
 
+## GDKP Module
+
+WarcraftPulse includes a full GDKP gold distribution system for raid organizations. Officers create organizations, configure raid templates with role brackets and cut formulas, run sign-ups (on the website or through a Discord bot), draft gold sheets, calculate payouts, and publish tamper-evident public sheets.
+
+Key capabilities:
+
+- **Organization management** with officer roles, treasury ledger, and banker designation
+- **Template presets** for reusable raid configurations with WCL-backed deduction/bonus rules
+- **Sign-ups** via web or Discord bot with role/spec selection and character linking
+- **Gold sheets** with boss assignments, assignment matrix, bonus caps, and revision history
+- **Cut calculation** with role brackets, special roles, boss-slot bonuses, and configurable org cuts
+- **Public sheets** with short URLs, integrity hash verification, and anonymous cut distribution histograms
+- **Treasury** with auto-booking, cross-sheet payouts, and CSV export
+- **Gargul & Softres** loot import
+- **Recurring raids** with auto-open-signups
+
+Finalized gold sheets are always public for transparency.
+
+## Desktop Uploader
+
+A companion Windows app that watches your WoW combat log directory and automatically uploads logs to warcraftpulse.com. Supports auto-watch, manual upload, duplicate detection, upload history, and secure token storage via Windows DPAPI.
+
+Source: [warcraftpulse-uploader](https://github.com/naekobest/warcraftpulse-uploader)
+
+## Discord Bot
+
+A lightweight sidecar bot that posts raid event embeds in Discord channels and handles sign-up interactions via buttons, select menus, and modals. The bot is stateless — all business logic lives in the Laravel backend.
+
+Source: [warcraftpulse-discord-bot](https://github.com/naekobest/warcraftpulse-discord-bot)
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -100,7 +130,9 @@ Every user gets a public profile at `/u/{username}` showing their pinned achieve
 | Queue | Redis + Laravel Horizon |
 | Auth | WarcraftLogs OAuth 2.0 |
 | Payments | Stripe (subscription tiers) |
-| API | WarcraftLogs GraphQL v2 |
+| API | WarcraftLogs GraphQL v2 + REST (upload) |
+| Desktop | .NET 8, WinForms (Windows uploader) |
+| Discord | discord.js, Node.js (sidecar bot) |
 
 See [Architecture Overview](docs/architecture.md) for more detail.
 
@@ -128,6 +160,9 @@ WarcraftPulse is currently in **Beta**. Classic Vanilla is the first supported e
 - [Analysis Pipeline](docs/analysis-pipeline.md): how the scoring engine works
 - [Analysis Services](docs/services.md): full list of implemented services with expansion support
 - [Per-Service Documentation](docs/services/index.md): technical analysis, scoring formulas, and WCL data dependencies for each service
+- [GDKP Module](docs/gdkp.md): organization management, gold sheets, sign-ups, and cut calculation
+- [Desktop Uploader](https://github.com/naekobest/warcraftpulse-uploader): Windows app for automatic log uploads
+- [Discord Bot](https://github.com/naekobest/warcraftpulse-discord-bot): sidecar bot for raid sign-ups in Discord
 - [Changelog](CHANGELOG.md): development history and recent changes
-- [Roadmap](docs/roadmap.md): planned features, expansion timeline, and GDKP module
+- [Roadmap](docs/roadmap.md): planned features, expansion timeline
 - [Contributing](CONTRIBUTING.md): how to suggest features or new analysis checks
