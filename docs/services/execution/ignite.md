@@ -22,8 +22,9 @@ Each continuous Ignite debuff period on the boss is one Ignite instance. For eac
 - Start time and end time within the fight
 - Total duration in seconds
 - Maximum tick damage observed
-- All contributing spells that landed during the Ignite window, attributed to their caster with individual damage values
+- All contributing spells that landed during the Ignite window, attributed to their caster with individual damage values and partial resist amounts
 - Total contributing damage across all casters
+- Total resisted damage across all contributing crits
 
 ### Integrated grief detection
 
@@ -50,6 +51,6 @@ The per-instance breakdown shows exactly what happened during each Ignite period
 
 The service uses the WCL debuff band data directly rather than reconstructing Ignite windows from damage events. Each `band` in the WCL aura response represents one continuous period where the Ignite debuff was active. Contributing spells are matched to bands by timestamp overlap.
 
-Hit type detection uses the WCL `hitType` field (1 = crit) to distinguish crits from regular hits. This is important because only crits add stacks to Ignite — non-crit fire hits do not contribute to Ignite and are excluded from the contributing spells list.
+Hit type detection uses the WCL `hitType` field to distinguish crits from regular hits. Both `hitType=2` (full crit) and `hitType=17` (partial resist crit) are tracked as contributing crits. Non-crit fire hits do not contribute to Ignite and are excluded from the contributing spells list. Partial resist amounts are recorded per crit and aggregated at the instance, boss, and summary levels.
 
 The previous implementation (before March 2026) reconstructed "combo sequences" by tracking consecutive Ignite ticks within a 2,150 ms window per source mage. This approach was replaced because it modeled Ignite as a per-player mechanic when it is actually a shared debuff. The band-based approach is both simpler and more accurate.

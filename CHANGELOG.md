@@ -1,3 +1,112 @@
+## 2026-03-19
+
+### GDKP: Public View Separation
+
+The GDKP organization sidebar now operates in three distinct modes — **Public**, **Player**, and **Management** — with automatic mode detection based on the visitor's role.
+
+**Public mode** is visible to everyone: a read-only view of upcoming raids, published sheets, and organization info. **Player mode** adds personal pages for members: My Raids, My Payouts, and My Stats. **Management mode** unlocks officer tools: dashboard, templates, treasury, and member management. A mode switcher in the sidebar header lets officers toggle between perspectives.
+
+New controllers and routes back each mode. Public raids and sheets pages are accessible without authentication. The management dashboard renders conditionally based on officer status.
+
+Players who sign up for a raid via the public page are now **auto-joined** to the organization as a member, removing a friction step that previously required a separate invite.
+
+### GDKP: Assignment Template Auto-fill & Drag-and-Drop
+
+Assignment templates gained three usability improvements:
+
+- **Auto-fill**: officers can auto-populate assignment slots based on signup data, pre-filling player names into their assigned boss slots
+- **General columns**: templates now support non-boss columns (e.g. "Bench", "Standby") alongside boss-specific assignments
+- **Drag-and-drop column reordering**: columns can be rearranged via drag handles using `@dnd-kit`, with auto-sized column widths and improved grip visibility
+
+A **World Tour** composite zone (MC + BWL + AQ40) has been added as a zone option for templates spanning multiple raids.
+
+### GDKP: Bonus Template Live Preview
+
+The bonus template editor now includes a **sticky sidebar preview** that recalculates the gold distribution in real time as officers edit role brackets, special roles, and bonus cap settings. The preview shows per-slot payout amounts and total distribution, updating instantly on every field change without requiring a save.
+
+### GDKP: CSV Import/Export for Pricelists
+
+Organization pricelists can now be **imported from and exported to CSV**. The import parser handles item ID, name, and minimum bid columns. Export produces a download-ready CSV with the full pricelist.
+
+### GDKP: Raid Soft-Delete
+
+Raids now support soft-deletion. The delete endpoint requires officer authorization and is guarded against deletion when active sheets exist. A confirmation dialog shows the consequences before proceeding. Soft-deleted raids can be restored by admins.
+
+### GDKP: Raid Date/Time Editing
+
+Officers can now **edit the date, time, and timezone** of existing raids. The update endpoint validates the new datetime and persists timezone information correctly.
+
+### Ignite: Partial Resist Tracking
+
+Ignite contributing spells now include **partial resist data**. Each contributing crit shows its resisted damage amount alongside the landed damage. Crits with `hitType=17` (partial resist crit) are now correctly tracked in addition to `hitType=2` (full crit).
+
+Three new aggregation levels surface total resisted damage:
+- Per Ignite instance
+- Per boss
+- Raid summary
+
+The frontend breakdown displays resist amounts inline per crit and in the instance/boss summary rows.
+
+### Self-hosted Font
+
+The primary font (Instrument Sans) is now **self-hosted** via `@fontsource/instrument-sans` instead of loading from Google Fonts CDN. This eliminates the external dependency and improves initial page load performance.
+
+### Fixed
+
+- **Billing manage button**: the subscription management button now appears for `past_due` and non-active subscription states, not just active ones.
+- **WarmGameTermCacheJob timeout**: the cache warming job has been refactored to fan out into per-encounter child jobs (`WarmEncounterCacheJob`), preventing timeout on large encounter sets.
+- **GDKP template redirects**: bonus, deduction, and assignment template creation/deletion now correctly redirect instead of returning 204, fixing Inertia navigation.
+- **GDKP duplicate sheets**: creating multiple sheets per raid is now prevented at the controller level.
+- **GDKP zone change**: changing the zone on a template only triggers a redirect when the zone actually changed, preventing unnecessary reloads.
+- **GDKP upcoming raids**: the hub page now shows upcoming raids with direct links to the raid detail page.
+- **GDKP assignment editor**: info note added for template-only rows; zone/wing selector added to editor.
+- **GDKP layout overflow**: assignment table contained within viewport, preventing horizontal body overflow.
+
+### Infrastructure
+
+- Deploy workflow gains `workflow_dispatch` trigger for manual deploys.
+- Nginx config applied and reloaded on every deploy.
+- Storage directory structure managed via deploy script instead of tracked `.gitkeep` files.
+- `socket.io-parser` bumped to 4.2.6 (GHSA-677m-j7p3-52f9).
+
+---
+
+## 2026-03-18
+
+### Discord Embed: Class-based Grouping
+
+Raid event embeds in Discord now **group signups by WoW class** instead of showing a flat list. Each class group is labeled with its **Application Emoji** — custom class icons uploaded to the Discord application via a new `discord:sync-emojis` Artisan command. The embed layout is more compact and scannable for officers checking raid composition at a glance.
+
+The signup flow in Discord has been rewritten to use a **class-first then role** selection pattern. When a player clicks the sign-up button, they first pick their class from a select menu, then their role/spec. This feeds the `wow_class` column on signups, enabling the class-grouped embed layout.
+
+### GDKP: Assignment Templates
+
+A new **assignment template** system lets officers create reusable player-to-boss assignment configurations.
+
+- **Model and CRUD**: `GdkpAssignmentTemplate` with full controller, routes, and authorization
+- **Editor UI**: visual editor for mapping players to boss slots, with sheet load functionality that populates the template from an existing sheet's participant list
+- **Sheet integration**: assignment templates are linked to sheets and feed into the assignment matrix and cut calculation
+
+### CI Pipeline Hardening
+
+The CI pipeline has been restructured for reliability and speed:
+
+- **Fail-fast chain**: lint runs first; tests only run if lint passes. A parallel audit job runs Trivy independently.
+- **OOM prevention**: xdebug removed (memory overhead without coverage reporting), PHP `memory_limit=-1` passed directly to Pest, environment-based memory guard in queue jobs replaces `runningUnitTests()` check.
+- **Path-based skip**: commits that only touch `docs/`, `_bmad/`, or markdown files skip the full pipeline.
+- **Caching**: OS-scoped npm cache, direct `node_modules` caching with skip-on-hit, shallow git clone.
+- **Permissions**: explicit `contents: read` and `actions: read` on all jobs.
+- **Dev branch**: CI disabled on `dev` push — only runs on `main` and PRs targeting `main`, avoiding double runs.
+
+### Fixed
+
+- **Production issues**: `config:cache` timing in deploy, `/legal` 404, stats chart rendering, and role detection resolved in a single hotfix.
+- **WCL evaluation dispatch**: `EvaluateSheetWclRulesJob` is now only dispatched when the sheet actually has WCL rules configured, preventing unnecessary API calls.
+- **Discord migration**: discord columns migration made idempotent to survive re-run on production.
+- **Deploy script**: `config:cache` replaced with `config:clear` to prevent stale config in subsequent artisan commands.
+
+---
+
 ## 2026-03-16
 
 ### GDKP Module: Public Beta

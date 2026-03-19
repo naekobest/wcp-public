@@ -18,9 +18,9 @@ Classic progression servers move forward over time and WarcraftPulse is designed
 
 ### Recently Shipped
 
-- **GDKP module (public beta)** — organization management, template presets, WCL rule templates, sign-ups (web + Discord bot), gold sheets with boss assignments and assignment matrix, cut calculation with role brackets and bonus caps, treasury with auto-booking and cross-sheet payouts, CSV export, public sheets with integrity hash, Gargul and Softres import, recurring raids
+- **GDKP module (public beta)** — organization management, template presets, WCL rule templates, sign-ups (web + Discord bot), gold sheets with boss assignments and assignment matrix, cut calculation with role brackets and bonus caps, treasury with auto-booking and cross-sheet payouts, CSV export, public sheets with integrity hash, Gargul and Softres import, recurring raids, public/player/management sidebar modes, assignment template auto-fill with drag-and-drop, bonus template live preview, CSV pricelist import/export, raid soft-delete
 - **Desktop uploader** — Windows app (.NET 8) for automatic combat log upload with auto-watch, duplicate detection, upload history, and DPAPI token encryption ([source](https://github.com/naekobest/warcraftpulse-uploader))
-- **Discord bot** — sidecar Node.js bot for raid event embeds and button-based sign-ups in Discord, with automatic signup linking on account connect ([source](https://github.com/naekobest/warcraftpulse-discord-bot))
+- **Discord bot** — sidecar Node.js bot for raid event embeds and button-based sign-ups in Discord, with automatic signup linking on account connect, class-based embed grouping with Application Emojis ([source](https://github.com/naekobest/warcraftpulse-discord-bot))
 - **Upload API** — authenticated REST endpoint for pre-parsed combat log data, API token management at Settings → API (Pro tier), Sanctum-based auth with rate limits
 - **Combat log parser** — server-side parser for raw WoW log files including COMBATANT_INFO gear/aura extraction, WCL-compatible output format
 - **Report page redesign** — service result cards with score bar navigation, deep-dive views, redesigned report lists with tier pills and sparklines, sticky header with section scores, keyboard navigation, compare bar, progressive results during analysis, density toggle, copy summary, tier gem icons
@@ -35,6 +35,8 @@ Classic progression servers move forward over time and WarcraftPulse is designed
 - **Consumables redesign** — required vs. optional bonus score separation, per-category compliance cards with progress bars, collapsible per-boss sections
 - **Expose Armor rework** — zero-tolerance gap detection (100 ms threshold), time-to-first-expose, zero-uptime threshold removed, updated severity labels
 - **Feral Faerie Fire tracking** — tracked separately from regular FF; segmented coverage bar with amber Feral FF indicator
+- **Ignite partial resist tracking** — contributing crits now include resisted damage amounts with aggregation at instance, boss, and summary levels
+- **Self-hosted font** — Instrument Sans served via @fontsource instead of Google Fonts CDN
 - **Admin Phase 3** — report bulk controls, archive/unarchive, member timed bans, login history, forced-acknowledgment alerts, user impersonation with audit logging
 - **Admin: expansion config editor** — inline-editable sections, diff view, audit log, override indicators, benchmark_min_samples
 - **Admin: GDKP system health** — queue history charts, feature flags, alert thresholds, rate limiter config
