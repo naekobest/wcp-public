@@ -1,3 +1,104 @@
+## 2026-03-20
+
+### Scoring System Removed
+
+The entire 0–100 scoring system has been removed from the platform. Scores, tier classifications, and score aggregation are gone — replaced by **raw metrics** that show what actually happened in a raid.
+
+The new UI focuses on concrete data points across all pages:
+
+- **Report hero**: compact stats bar with Deaths, Buffs, Consumables, Interrupts, Dispels
+- **Player table**: multi-metric columns showing DPS/HPS, Deaths, Active%, Consumes, Enchants
+- **Report lists**: dedicated columns for Bosses (X/Y), Deaths, Flasks
+- **Dashboard**: feature cards highlighting Deaths, Consumables, Buff Uptimes, Interrupts — plus Boss Kills and Characters Tracked as top-level stats
+- **Character page**: DPS/HPS trend area chart and 60-day activity grid
+- **Profile stats**: four new charts — Raids/Week, Expansion Distribution, Monthly Activity, Top Zones
+- **Completion reveal**: animated count-up metrics grid replacing the old score reveal
+
+16 score-based achievements (RisingStar, PurpleReign, Perfectionist, etc.) have been replaced with 15 activity-based alternatives: ZeroDeathsRaid, FlaskMaster, VeteranRaider, and others that reward concrete gameplay milestones.
+
+### GDKP: Bonus Template Overhaul
+
+The bonus template editor has been completely rebuilt with a **3-step setup wizard** and three distinct bonus modes:
+
+- **Flat**: traditional percentage-based distribution
+- **Performance (DPS + Heal)**: two pools distributed proportionally by WCL damage and healing data
+- **Performance (DPS + Heal + Misc)**: adds a third officer-assigned pool for utility roles (tanks, buffs, etc.)
+
+**Unified assignment groups** replace the previous scattered role brackets, special roles, and boss assignments. Officers define named groups with configurable weight shares. **Management cut subdivision** lets organizations split the org cut into named portions (e.g. "Guild Bank", "Host Fee").
+
+A **live preview sidebar** recalculates the full pot distribution in real time as officers adjust mode, weights, and assignments. A **pot flow visualization** shows how gold moves from gross pot through management cut, performance pools, and equal split remainder.
+
+### GDKP: Deduction Template Overhaul
+
+Deduction templates have been refactored from shared database rows to a **unified JSON architecture**. Each template now stores its rules as an embedded JSONB column, making templates fully self-contained and portable.
+
+A **3-step setup wizard** (Name → Zone → Severity) auto-populates templates from config-based presets — 53 rules per severity variant (Light, Standard, Strict), covering consumables, world buffs, enchants, debuff uptime, and more.
+
+The frontend editor has been decomposed from a single 885-line component into 10+ focused React components with a **two-column layout**: rule editor on the left, sticky live preview on the right. Officers can toggle individual rules, adjust gold values, add custom rules via dialog, and see the impact on a sample raid roster instantly.
+
+### GDKP: Assignment Template Editor
+
+The assignment template editor gained row management and visual improvements:
+
+- **Row operations**: delete, drag-and-drop reorder, and duplicate rows
+- **Separator rows**: a new row type with editable labels and preset chips (Tanks, Healers, Melee DPS, Ranged DPS, Caster) for visual grouping — separators persist through template-to-sheet load and sheet matrix saves
+- **Class-colored character names**: character names render in their WoW class color, sourced from a new known-characters endpoint that maps organization signups to class data
+- **Autocomplete**: typing in a cell shows character name suggestions from the organization's signup history
+- **Keyboard navigation**: Tab, Enter, and Arrow keys move between cells, automatically skipping separator rows
+
+The assignment matrix has also been restyled to a **spreadsheet-like layout** for faster data entry.
+
+### GDKP: Sheet Template Assignment
+
+Bonus and deduction templates can now be **applied to existing draft sheets**, not just at creation time. Three new tabs on the sheet page surface template configuration:
+
+- **Bonuses tab**: displays the active bonus config with a live gold distribution preview
+- **Deductions tab**: shows editable deduction rules with a live preview of deductions across the roster
+- **Settings tab**: template selectors for swapping bonus and deduction templates, with a confirmation dialog when re-applying over existing configuration
+
+Sheet creation also accepts **direct template IDs**, allowing officers to override the raid's default templates when drafting a new sheet.
+
+### GDKP: Performance-Based Bonus Distribution
+
+A new **dual-pool bonus mode** enables gold distribution based on actual combat performance:
+
+- **Performance pool**: split into DPS and Heal sub-pools, distributed proportionally by WCL damage and healing data
+- **Assignment pool**: officer-configured custom slots in freely-definable groups (Tanks, Buffs, Utility, etc.)
+- **Equal split**: the remainder after both pools, divided equally among all raiders
+
+Config snapshots are versioned (v1 for flat, v2 for performance) to maintain backward compatibility with existing finalized sheets.
+
+### GDKP: Granular Role & Permission System
+
+The role system has been expanded from 3 roles to **7**: Owner, Host, Officer, Raid Lead, Auctioneer, Banker, and Player. Each organization can configure **26 discrete permissions** across these roles — covering raid management, sheet operations, treasury access, member management, and template editing.
+
+A new **Roles & Permissions** settings page lets officers customize which roles can perform which actions, with save and reset-to-defaults functionality.
+
+### GDKP: Raid Self-Withdrawal
+
+Players can now **withdraw from raid signups** with a mandatory reason. When a confirmed spot opens, officers are notified and the standby queue advances. Withdrawn players can re-signup if the raid is still accepting sign-ups. A new filter tab on the signup list shows withdrawn entries with their reasons.
+
+### GDKP: Gargul Import Improvements
+
+The Gargul loot import now supports **CSV format** alongside the existing addon export format. The import UI has been polished with better preview rendering and validation. A bigint migration ensures large item IDs from newer WoW expansions are handled correctly.
+
+### GDKP: Default Price Lists
+
+New organizations are now **auto-seeded with a default price list** on creation, reducing the initial setup steps for officers getting started with GDKP.
+
+### GDKP: Role Badge Colors
+
+Member role badges throughout the GDKP interface are now **color-coded** by role tier, with matching colors in the role dropdown selectors.
+
+### Fixed
+
+- **Deduction snapshot mapping**: `buildConfigSnapshotFromTemplates()` now correctly maps `value_bps` → `value` and `is_enabled` → `is_active` for deduction rules, fixing incorrect snapshot data.
+- **Assignment matrix save**: boss notes and rows are now preserved through matrix save cycles.
+- **My Stats attendance metric**: replaced broken attendance calculation with a no-show rate metric.
+- **Template validation**: empty preview tables show proper empty states; validation rules simplified across template editors.
+
+---
+
 ## 2026-03-19
 
 ### GDKP: Public View Separation

@@ -18,16 +18,16 @@ Classic progression servers move forward over time and WarcraftPulse is designed
 
 ### Recently Shipped
 
-- **GDKP module (public beta)** — organization management, template presets, WCL rule templates, sign-ups (web + Discord bot), gold sheets with boss assignments and assignment matrix, cut calculation with role brackets and bonus caps, treasury with auto-booking and cross-sheet payouts, CSV export, public sheets with integrity hash, Gargul and Softres import, recurring raids, public/player/management sidebar modes, assignment template auto-fill with drag-and-drop, bonus template live preview, CSV pricelist import/export, raid soft-delete
+- **GDKP module (public beta)** — organization management with 7 granular roles and 26 configurable permissions, 3-mode bonus templates (flat/performance/performance+assignment) with live preview and pot flow visualization, deduction templates with setup wizard and 53 presets per severity, assignment templates with drag-and-drop, separators, class colors, and autocomplete, sign-ups (web + Discord bot) with self-withdrawal, gold sheets with template assignment tabs (Bonuses/Deductions/Settings), performance-based cut calculation from WCL data, treasury with auto-booking and cross-sheet payouts, CSV export, public sheets with integrity hash, Gargul and Softres import (incl. CSV), recurring raids, default price list seeding
 - **Desktop uploader** — Windows app (.NET 8) for automatic combat log upload with auto-watch, duplicate detection, upload history, and DPAPI token encryption ([source](https://github.com/naekobest/warcraftpulse-uploader))
 - **Discord bot** — sidecar Node.js bot for raid event embeds and button-based sign-ups in Discord, with automatic signup linking on account connect, class-based embed grouping with Application Emojis ([source](https://github.com/naekobest/warcraftpulse-discord-bot))
 - **Upload API** — authenticated REST endpoint for pre-parsed combat log data, API token management at Settings → API (Pro tier), Sanctum-based auth with rate limits
 - **Combat log parser** — server-side parser for raw WoW log files including COMBATANT_INFO gear/aura extraction, WCL-compatible output format
-- **Report page redesign** — service result cards with score bar navigation, deep-dive views, redesigned report lists with tier pills and sparklines, sticky header with section scores, keyboard navigation, compare bar, progressive results during analysis, density toggle, copy summary, tier gem icons
+- **Report page redesign** — service result cards, deep-dive views, redesigned report lists with metric columns (Bosses, Deaths, Flasks), sticky header, keyboard navigation, progressive results during analysis, density toggle, copy summary
 - **Snapshot retention** — tier-based retention periods with `expires_at` timestamps and report-page retention banner
-- **Platform-wide statistics** — public `/stats` page with activity metrics, class rankings, score distribution, and zone stats
-- **Character: role-aware scoring** — healers excluded from Performance, tanks excluded from Performance and Buffs, role-filtered trend charts
-- **Dashboard: engagement stats** — six per-user metric cards with tier colors and count-up animations, WCL API budget arc gauge
+- **Platform-wide statistics** — public `/stats` page with activity metrics, class rankings, and zone stats
+- **Character: role-aware metrics** — healers excluded from Performance, tanks excluded from Performance and Buffs, DPS/HPS trend area charts, 60-day activity grid
+- **Dashboard: engagement stats** — metric cards with count-up animations, Boss Kills and Characters Tracked stats, WCL API budget arc gauge, feature cards for guest view
 - **Discord integration** — OG meta tags for rich link previews, webhook notifications for analysis-complete, achievements, and changelog events, Discord account linking via OAuth
 - **WarcraftLogs account linking** — link/unlink WCL to email-registered accounts in Settings → Linked Accounts, with lockout guard for WCL-primary users
 - **Auth UI polish** — password strength meter, show/hide toggle, real-time confirm match indicator, remember me, repositioned OAuth button
@@ -51,8 +51,8 @@ Classic progression servers move forward over time and WarcraftPulse is designed
 - **German translations** — full UI i18n parity, language selector in Appearance settings, boss name localization
 - **Public user profiles** — `/u/{number}` with achievement showcase and configurable privacy
 - **Achievement system** — 45 achievements across 8 categories, daily progress sync, profile showcase pinning
-- **Performance scoring** — DPS and Healing scored via class-based median comparison; per-player score badges across all analysis cards
-- **Player breakdown redesign** — all result components rebuilt with per-player drill-down, accordion patterns, leaderboards, and score badges
+- **Scoring system removal** — replaced 0–100 scoring with raw metrics (Deaths, DPS/HPS, Buff Uptimes, Consumables, Interrupts, Dispels), animated count-up completion reveal, 15 activity-based achievements replacing 16 score-based ones, profile stats with Raids/Week, Expansion Distribution, Monthly Activity, Top Zones charts
+- **Player breakdown redesign** — all result components rebuilt with per-player drill-down, accordion patterns, leaderboards, and metric badges
 - **Onboarding checklist** — guided setup: WCL connect, first report, character claim, profile configuration
 - **Fight Timeline service** — chronological fight timeline with pacing stats and Naxxramas wing timing
 - **Re-analysis for Premium+** — manual re-run of analysis pipeline with hourly rate limit and tier-based queue priority
@@ -84,10 +84,10 @@ Classic progression servers move forward over time and WarcraftPulse is designed
 
 ### Near Term
 
-- **Character profiles**: per-character history across all analyzed raids, including DPS/HPS trends, mechanic score, preparation score, and role-aware benchmarks
+- **Character profiles**: per-character history across all analyzed raids, including DPS/HPS trends and role-aware benchmarks
 - **Mobile responsive layout**: the current UI is desktop-first
 - **Comparative reports**: a "your guild vs. last week" diff view
-- **Public leaderboards**: opt-in raid scoring by server and faction
+- **Public leaderboards**: opt-in raid rankings by server and faction
 
 ### Long Term / Expansion Dependent
 

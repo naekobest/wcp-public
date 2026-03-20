@@ -12,7 +12,6 @@ AnalyzeRaidJob
       -> QueryPlanner: merge DataRequirements -> minimal GraphQL queries
       -> WarcraftLogsClient: execute queries -> ReportContext
       -> foreach service: analyze(ReportContext) -> persist result
-      -> ReportCardService runs last -> overall score
       -> Report status -> completed
 ```
 
@@ -60,7 +59,7 @@ Each expansion has a config file defining:
 
 - Which services are active
 - Spell IDs for tracked abilities (sunder armor, expose armor, world buffs, etc.)
-- Scoring thresholds (e.g. "interrupt rate below 80% = Poor")
+- Analysis thresholds (e.g. "interrupt rate below 80% flagged")
 - Difficulty modes (Vanilla = Normal only; Retail = Normal/Heroic/Mythic)
 
 This means the same `InterruptService` works for every expansion. The expansion config supplies the interrupt spell IDs and the threshold that constitutes good interrupt coverage.
@@ -78,18 +77,12 @@ Analysis results are stored in four scoped tables:
 
 Results are written once and resubmitting the same report is a no-op. The `data` column is JSONB, which allows each service to store whatever structure it needs without requiring migrations when services evolve.
 
-## ReportCard
+## Metrics
 
-`ReportCardService` runs last. It reads all other services' persisted results, calculates a weighted 0 to 100% score per category, and derives an overall raid score.
+Each analysis service persists raw metrics (DPS numbers, uptimes, counts, durations) rather than derived scores. The frontend surfaces these metrics directly — Deaths, DPS/HPS, Buff Uptimes, Consumable compliance, Interrupts, Dispels — so users see exactly what happened without an intermediate scoring layer.
 
-Category weights are configurable per expansion. In Vanilla Classic, Preparation (world buffs, consumables) carries more weight than in later expansions where consumable culture is different.
+### Performance: Class-Based Medians
 
-### Performance Scoring: Class-Based Medians
-
-DPS and Healing services now contribute to the Performance category score using a class-based median comparison model. For each player, their output is compared against the median for their class within the same raid. This produces a 0 to 100 score that reflects how well a player performed relative to what their class is expected to deliver in that specific environment.
-
-The class median approach avoids punishing players for playing lower-DPS specs and avoids rewarding players for simply being in a raid with lower overall output. A score of 100 means the player was at or above their class median by the configured threshold margin.
+DPS and Healing services compare each player's output against the median for their class within the same raid. This avoids punishing players for playing lower-DPS specs and avoids rewarding players for simply being in a raid with lower overall output.
 
 Pets and NPCs are automatically filtered from rankings using the `knownPlayerNames` set derived from the WCL roster.
-
-The final score per category is mapped to WoW's item quality grades: Poor, Common, Uncommon, Rare, Epic, Legendary.

@@ -5,11 +5,9 @@
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/naekobest/wcp-public)
 [![Stack](https://img.shields.io/badge/stack-Laravel%2012%20%7C%20React%20%7C%20PostgreSQL-blue)](docs/architecture.md)
 
-WarcraftPulse ingests your WarcraftLogs report and runs a structured analysis pipeline across four categories: **Execution**, **Preparation**, **Performance**, and **Buffs**. Every player gets scored individually. The raid gets an overall score. Results are graded on WoW's own quality scale, from Poor to Legendary.
+WarcraftPulse ingests your WarcraftLogs report and runs a structured analysis pipeline across four categories: **Execution**, **Preparation**, **Performance**, and **Buffs**. Every player is tracked with concrete metrics — Deaths, DPS/HPS, Buff Uptimes, Consumable Usage, Interrupts, Dispels — so guild leaders can see exactly what happened without opening a single WCL tab.
 
 No spreadsheets. No manual log scrubbing. Submit a WCL URL, wait a few seconds, get a full breakdown.
-
-Every player gets a per-player score badge on each analysis card, graded on the same WoW quality scale. Guild leaders can see at a glance who is performing well and where the gaps are, without opening a single WCL tab.
 
 ## Why Not Just Use WarcraftLogs?
 
@@ -20,7 +18,7 @@ WarcraftLogs is excellent for raw data: damage meters, cast timelines, event log
 - Who used their engineering items on cooldown?
 - Are your DPS players running the right resistance gear?
 
-WarcraftLogs shows you the events. WarcraftPulse scores the execution.
+WarcraftLogs shows you the events. WarcraftPulse surfaces what matters.
 
 ## What Gets Analyzed
 
@@ -65,24 +63,23 @@ Raid-wide buff infrastructure and uptime.
 - **Combat buffs**: Bloodlust/Heroism coverage per fight phase
 - **Player buff coverage**: who received which buffs and for how long
 
-## Score System
+## Metrics
 
-Each category receives a score from 0 to 100%, then mapped to WoW's item quality scale:
+WarcraftPulse surfaces raw, concrete metrics instead of abstract scores:
 
-| Score | Grade | Color |
-|-------|-------|-------|
-| 0–29% | Poor | Gray |
-| 30–49% | Common | White |
-| 50–64% | Uncommon | Green |
-| 65–79% | Rare | Blue |
-| 80–94% | Epic | Purple |
-| 95–100% | Legendary | Orange |
+- **Deaths** — per-player, per-boss, avoidable vs. unavoidable
+- **DPS / HPS** — class-median comparison with trend charts
+- **Buff Uptimes** — world buffs, raid buffs, consumables
+- **Consumables** — flask, elixir, food compliance per player
+- **Interrupts** — response rate and coverage
+- **Dispels** — per-type (Magic/Poison/Disease/Curse) leaderboard
+- **Active Time** — engagement percentage per player
 
-An overall raid score is calculated from a weighted average across all four categories. The weighting is configurable per expansion, since what matters in Vanilla Classic differs from what matters in Mists of Pandaria.
+Reports show animated count-up summaries on completion. Character pages include DPS/HPS trend area charts and 60-day activity grids. Dashboard stats highlight Boss Kills and Characters Tracked.
 
 ## Achievements
 
-45 achievements across 8 categories track your journey on the platform. Tiered achievements (I through IV) unlock progressively as you submit more reports, achieve higher scores, and explore different classes and expansions. Legendary one-time achievements reward rare milestones like a perfect raid score or being an early adopter.
+45 achievements across 8 categories track your journey on the platform. Tiered achievements (I through IV) unlock progressively as you submit more reports, hit gameplay milestones (zero deaths, full flask compliance, veteran raider status), and explore different classes and expansions. Legendary one-time achievements reward rare accomplishments like being an early adopter.
 
 Pin up to 3 achievements to your public profile as a showcase. Achievement progress syncs daily.
 
@@ -96,15 +93,18 @@ WarcraftPulse includes a full GDKP gold distribution system for raid organizatio
 
 Key capabilities:
 
-- **Organization management** with officer roles, treasury ledger, and banker designation
-- **Template presets** for reusable raid configurations with WCL-backed deduction/bonus rules
-- **Sign-ups** via web or Discord bot with role/spec selection and character linking
-- **Gold sheets** with boss assignments, assignment matrix, bonus caps, and revision history
-- **Cut calculation** with role brackets, special roles, boss-slot bonuses, and configurable org cuts
+- **Organization management** with 7 granular roles (Owner, Host, Officer, Raid Lead, Auctioneer, Banker, Player) and 26 configurable permissions
+- **Bonus templates** with 3 distribution modes: flat percentage, performance-based (DPS + Heal pools from WCL data), and performance + manual assignment pools — live preview sidebar and pot flow visualization
+- **Deduction templates** with setup wizard, config-based presets (53 rules per severity variant), and live preview
+- **Assignment templates** with drag-and-drop row management, separator rows, class-colored character names, and autocomplete
+- **Sign-ups** via web or Discord bot with role/spec selection, character linking, and self-withdrawal
+- **Gold sheets** with boss assignments, assignment matrix, and template assignment tabs (Bonuses, Deductions, Settings)
+- **Cut calculation** with role brackets, performance pools, assignment groups, and configurable org cuts
 - **Public sheets** with short URLs, integrity hash verification, and anonymous cut distribution histograms
 - **Treasury** with auto-booking, cross-sheet payouts, and CSV export
-- **Gargul & Softres** loot import
+- **Gargul & Softres** loot import (including CSV format)
 - **Recurring raids** with auto-open-signups
+- **Default price lists** auto-seeded on organization creation
 
 Finalized gold sheets are always public for transparency.
 
