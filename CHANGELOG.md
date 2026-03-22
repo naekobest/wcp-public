@@ -1,3 +1,122 @@
+## 2026-03-22
+
+### Report Redesign
+
+The report page has been fully redesigned across three shipping increments.
+
+**ContextStrip** replaces the Hero Banner and Raid Stats Bar with a compact single-row header showing date, boss kills, raid duration, insight badges (deaths, consumable issues, interrupts), and action buttons inline. Zone name now appears once in the breadcrumb and once as the page headline.
+
+**Dark theme foundation** deepens the dark palette across all 40+ report components via report-specific CSS variables. Five new shared UI primitives are now used throughout the report:
+
+| Component | Purpose |
+|-----------|---------|
+| StatCard | Key metric display with label and value |
+| PillToggle | Role or scope filter |
+| RelativeBar | Proportional DPS/HPS bar |
+| Leaderboard | Always-visible ranked player list |
+| HeatmapTable | Player × Boss matrix for sparse data |
+
+**Redesigned result components:**
+
+- **Players tab** — relative DPS/HPS bars, rank column, role filter via PillToggle
+- **Buff/Debuff uptime** — multi-bar-per-boss layout with an overall summary section
+- **Cooldowns & Trinkets** — Player × Boss heatmap tables
+- **Ignite** — pill boss tabs, compact stats, expanded spell table
+- **World Buffs** — Player × Buff matrix table
+- **Consumables** — inline item names, per-boss heatmap
+- **DPS/Healing** — `PlayerHealingTable` component shared between overall and per-boss accordion views
+
+Dead code removed: `CategoryInsights` logic, the `section` prop on `CategoryTabContent` and `ReportSection`, and the `DensityToggle` component.
+
+### Consumables: Class-Aware Requirements
+
+The Vanilla consumable service now understands class and role. Warriors are no longer checked for mana elixirs; a healer's weapon buff requirements differ from those of a DPS caster. Buff-slot grouping treats logically exclusive categories (e.g. battle elixir vs. guardian elixir) as alternatives rather than independent requirements, eliminating false non-compliance flags.
+
+Additional consumable IDs added: Grilled Squid, Dirge's Chimaerok Chops, Brilliant Wizard Oil, Brilliant Mana Oil, and others.
+
+**Instant heatmap tooltips.** Hovering a ✗ or ~ cell in the consumable heatmap now shows an instant tooltip listing which buff categories are missing or suboptimal for that player on that boss — no CSS delay, no transition animation.
+
+### WCL Evaluation Pipeline
+
+The WCL rule evaluation pipeline has been rebuilt end-to-end:
+
+- **Template linkage fixed** — `GdkpTemplateRule` now connects to `GdkpRaidTemplate` via a single `template_id` FK. The previous split `bonus_template_id`/`deduction_template_id` approach is removed.
+- **Mandatory evaluation** — Draft → InReview transitions always dispatch `EvaluateSheetWclRulesJob`. A 422 is returned when no WCL report code, template, or evaluable rules are present.
+- **Config snapshot** — `config_snapshot.wcl_rules` is always populated on every Draft → InReview transition.
+- **Boss filtering** — `CastCountEvaluator` supports `boss_filter` for time-range-based fight filtering via `buildFightTimeRanges`.
+- **Combatant evaluators** now resolve player names via the `sourceID → name` map instead of the missing name field in the WCL response.
+
+**5 new evaluators:**
+
+| Evaluator | What it checks |
+|-----------|---------------|
+| CastTargetingEvaluator | Casts aimed at correct targets |
+| FrostResistanceEvaluator | Frost resistance buff presence |
+| TalentCheckEvaluator | Talent spec compliance |
+| TargetDamageDoneEvaluator | Damage dealt to specific targets |
+| WorldBuffConsistencyEvaluator | World buff presence per player |
+
+**11 new preset rules** covering frost resistance, talent specs, world buffs, cast targeting, and target damage are included in the WCL preset seeder.
+
+### GDKP: Suite Polish
+
+- **Settings navigation** — Permissions tab added to the settings layout; DiscordBot, RaidHelper, and RecurringRaids pages now show the full tab nav and have consistent padding
+- **Permissions page** — integrated into the settings tab layout; Owner column added (always checked); role labels updated to Raidlead and Auctioneer
+- **Past raids** — grouped by month in the past raids list; "Open Sign-ups" button hidden for past raids; sign-ups auto-close on a 15-minute schedule
+- **Public sheet access** — finalized and archived sheets are now accessible to guests and non-members (policy, middleware, null-safe controller guards)
+- **My Stats** — empty state displayed when no raids have been participated in
+- **Analytics & Sheet detail** — item icons enlarged; quality color swatch rectangles removed from before item icons
+
+---
+
+## 2026-03-21
+
+### Security Hardening
+
+- **Sanctum token expiration** set to 7 days (previously: never). Configurable via `SANCTUM_TOKEN_EXPIRATION` env var.
+- **OAuth state replay** vulnerability fixed in BattlenetController.
+- **Dependency updates**: `league/commonmark` and `phpseclib` updated for CVE-2026-33347 and CVE-2026-32935.
+- **User serialization** switched to an explicit allowlist, preventing accidental field leakage in API responses.
+- **CSP nonce** applied to inline scripts.
+- **Discord webhooks** are now verified via HTTP GET before being saved.
+- **Rate limiting**: proactive WCL budget check before expensive API queries; 24h immutable event cache for WCL data that cannot change.
+- **ETag middleware** on report routes for 304 support; exponential polling backoff (3s → 15s).
+- **GDKP models hardened**: guarded fields added, FK names corrected, race conditions fixed.
+
+### Performance
+
+- Composite DB indexes on `gdkp_participants(user_id, griefed)`, `gdkp_participants(user_id, no_show)`, `gdkp_items(sheet_id, bid_amount)`, and all 4 analysis result tables `(raid_id, player_id, raid_boss_id)`.
+- N+1 query elimination in ComparisonController (LATERAL join, UNION ALL) and ReportController (UNION EXISTS/DISTINCT).
+- Shared props cached: notifications (120s), system banner (300s), alerts (600s), GDKP orgs (1h).
+- React memoization applied to heavy report tables.
+- Job batching improvements and queue resilience: dead-letter handling and retry configuration.
+- `GdkpSuspiciousActivityDetector` switched from `pluck()` to `get()`, eliminating 4N re-queries on aggregates.
+
+### Accessibility
+
+- `scope="col"` added to all table headers; `aria-label` added to all data tables.
+- Pagination wrapped in `<nav>` landmark with `aria-live` for page announcements.
+- `aria-sort` on sortable columns in admin reports.
+- Focus management and route announcer for Inertia SPA transitions.
+- `aria-label` on all icon-only buttons (account menu, zone dropdown, etc.).
+- `sr-only` text alternatives for data visualizations (charts, heatmaps).
+- `aria-expanded` audit across all expandable components.
+- `aria-live` regions on dynamic content areas.
+- External links: `target="_blank"` paired with `rel="noopener noreferrer"` and visible indicators throughout.
+- Focus rings enforced consistently; touch targets enlarged to 44×44px minimum.
+- Decorative elements marked `aria-hidden`; reduced-motion media query applied to animations.
+
+### Fixed
+
+- GDKP sheet cut calculation bugs (#545, #546, #548): incorrect cut amounts on split bids, rounding edge cases, and zero-participant handling.
+- Analysis pipeline cache key aligned with report controller `v2` prefix; stale keys causing cache misses resolved.
+- Guard against malformed WCL API responses returning `null` for encounter data.
+- `pipeline:progress` event firing corrected; throttle middleware bug and undefined variable in report pipeline resolved.
+- GDKP small fixes: item search debounce, officer invite validation, treasury balance refresh, pricelist sort stability.
+- GDKP frontend fixes: error handling on failed sheet transitions, double-submit prevention, empty-state components added to member and item lists, `formatGold` import consolidated to single source.
+
+---
+
 ## 2026-03-20
 
 ### Scoring System Removed
